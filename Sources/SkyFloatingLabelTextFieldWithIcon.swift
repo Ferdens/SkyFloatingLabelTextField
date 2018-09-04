@@ -12,70 +12,106 @@
 import UIKit
 
 /**
- Identify the type of icon. 
-    - font: Set your icon by setting the font of iconLabel
-    - image: Set your icon by setting the image of iconImageView
+ Identify the type of icon.
+ - font: Set your icon by setting the font of iconLabel
+ - image: Set your icon by setting the image of leftIconImageView
  */
 public enum IconType: Int {
     case font
     case image
+    case button
 }
 
 /**
  A beautiful and flexible textfield implementation with support for icon, title label, error message and placeholder.
  */
 open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
-
+    
+    open var rightButtonActionHandler: (() -> Void)?
+    open var leftButtonActionHandler: (() -> Void)?
+    
     @IBInspectable
-    var iconTypeValue: Int {
+    var leftIconTypeValue: Int {
         get {
-            return self.iconType.rawValue
+            return self.leftIconType.rawValue
         }
-
+        
         set(iconIndex) {
-            self.iconType = IconType(rawValue: iconIndex) ?? .font
+            self.leftIconType = IconType(rawValue: iconIndex) ?? .font
         }
     }
-
-    open var iconType: IconType = .font {
+    
+    open var leftIconType: IconType = .font {
         didSet {
-            updateIconViewHiddenState()
+            updateLeftIconViewHiddenState()
         }
     }
-
+    
+    @IBInspectable
+    var rigthIconTypeValue: Int {
+        get {
+            return self.rightIconType.rawValue
+        }
+        
+        set(iconIndex) {
+            self.rightIconType = IconType(rawValue: iconIndex) ?? .font
+        }
+    }
+    
+    open var rightIconType: IconType = .font {
+        didSet {
+            updateRightIconViewHiddenState()
+        }
+    }
+    
     /// A UIImageView value that identifies the view used to display the icon
-    open var iconImageView: UIImageView!
-
+    open var leftIconImageView  : UIImageView!
+    open var rightIconImageView : UIImageView!
+    
+    open var leftIconButtonView : UIButton!
+    open var rightIconButtonView: UIButton!
+    
     /// A UIImage value that determines the image that the icon is using
     @IBInspectable
-    dynamic open var iconImage: UIImage? {
+    dynamic open var leftIconImage: UIImage? {
         didSet {
             // Show a warning if setting an image while the iconType is IconType.font
-            if self.iconType == .font { NSLog("WARNING - Did set iconImage when the iconType is set to IconType.font. The image will not be displayed.") } // swiftlint:disable:this line_length
-            iconImageView?.image = iconImage
+            if self.leftIconType == .font { NSLog("WARNING - Did set iconImage when the iconType is set to IconType.font. The image will not be displayed.") } // swiftlint:disable:this line_length
+            leftIconImageView?.image = leftIconImage
+            leftIconButtonView?.setImage(leftIconImage, for: .normal)
         }
     }
-
+    
+    @IBInspectable
+    dynamic open var rightIconImage: UIImage? {
+        didSet {
+            // Show a warning if setting an image while the iconType is IconType.font
+            if self.rightIconType == .font { NSLog("WARNING - Did set iconImage when the iconType is set to IconType.font. The image will not be displayed.") } // swiftlint:disable:this line_length
+            rightIconImageView?.image = rightIconImage
+            rightIconButtonView?.setImage(rightIconImage, for: .normal)
+        }
+    }
+    
     /// A UILabel value that identifies the label used to display the icon
     open var iconLabel: UILabel!
-
+    
     /// A UIFont value that determines the font that the icon is using
     @objc dynamic open var iconFont: UIFont? {
         didSet {
             iconLabel?.font = iconFont
         }
     }
-
+    
     /// A String value that determines the text used when displaying the icon
     @IBInspectable
     open var iconText: String? {
         didSet {
             // Show a warning if setting an icon text while the iconType is IconType.image
-            if self.iconType == .image { NSLog("WARNING - Did set iconText when the iconType is set to IconType.image. The icon with the specified text will not be displayed.") } // swiftlint:disable:this line_length
+            if self.leftIconType == .image { NSLog("WARNING - Did set iconText when the iconType is set to IconType.image. The icon with the specified text will not be displayed.") } // swiftlint:disable:this line_length
             iconLabel?.text = iconText
         }
     }
-
+    
     /// A UIColor value that determines the color of the icon in the normal state
     @IBInspectable
     dynamic open var iconColor: UIColor = UIColor.gray {
@@ -83,7 +119,7 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
             updateIconLabelColor()
         }
     }
-
+    
     /// A UIColor value that determines the color of the icon when the control is selected
     @IBInspectable
     dynamic open var selectedIconColor: UIColor = UIColor.gray {
@@ -91,7 +127,7 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
             updateIconLabelColor()
         }
     }
-
+    
     /// A float value that determines the width of the icon
     @IBInspectable
     dynamic open var iconWidth: CGFloat = 20 {
@@ -99,9 +135,9 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
             updateFrame()
         }
     }
-
+    
     /**
-     A float value that determines the left margin of the icon. 
+     A float value that determines the left margin of the icon.
      Use this value to position the icon more precisely horizontally.
      */
     @IBInspectable
@@ -110,9 +146,9 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
             updateFrame()
         }
     }
-
+    
     /**
-     A float value that determines the bottom margin of the icon. 
+     A float value that determines the bottom margin of the icon.
      Use this value to position the icon more precisely vertically.
      */
     @IBInspectable
@@ -121,7 +157,7 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
             updateFrame()
         }
     }
-
+    
     /**
      A float value that determines the rotation in degrees of the icon.
      Use this value to rotate the icon in either direction.
@@ -130,32 +166,32 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
     open var iconRotationDegrees: Double = 0 {
         didSet {
             iconLabel.transform = CGAffineTransform(rotationAngle: CGFloat(iconRotationDegrees * .pi / 180.0))
-            iconImageView.transform = CGAffineTransform(rotationAngle: CGFloat(iconRotationDegrees * .pi / 180.0))
+            leftIconImageView.transform = CGAffineTransform(rotationAngle: CGFloat(iconRotationDegrees * .pi / 180.0))
         }
     }
-
+    
     // MARK: Initializers
-
+    
     /**
      Initializes the control
      - parameter type the type of icon
      */
     convenience public init(frame: CGRect, iconType: IconType) {
         self.init(frame: frame)
-        self.iconType = iconType
-        updateIconViewHiddenState()
+        self.leftIconType = iconType
+        updateLeftIconViewHiddenState()
     }
-
+    
     /**
-    Initializes the control
-    - parameter frame the frame of the control
-    */
+     Initializes the control
+     - parameter frame the frame of the control
+     */
     override public init(frame: CGRect) {
         super.init(frame: frame)
         createIcon()
-        updateIconViewHiddenState()
+        updateLeftIconViewHiddenState()
     }
-
+    
     /**
      Intialzies the control by deserializing it
      - parameter coder the object to deserialize the control from
@@ -163,19 +199,22 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         createIcon()
-        updateIconViewHiddenState()
+        updateLeftIconViewHiddenState()
     }
-
+    
     // MARK: Creating the icon
-
+    
     /// Creates the both icon label and icon image view
     fileprivate func createIcon() {
         createIconLabel()
-        createIconImageView()
+        createleftIconImageView()
+        createLeftButtonView()
+        createRightIconImageView()
+        createRightButtonView()
     }
-
+    
     // MARK: Creating the icon label
-
+    
     /// Creates the icon label
     fileprivate func createIconLabel() {
         let iconLabel = UILabel()
@@ -186,41 +225,107 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
         addSubview(iconLabel)
         updateIconLabelColor()
     }
-
+    
     // MARK: Creating the icon image view
-
+    
     /// Creates the icon image view
-    fileprivate func createIconImageView() {
-        let iconImageView = UIImageView()
-        iconImageView.backgroundColor = .clear
-        iconImageView.contentMode = .scaleAspectFit
-        iconImageView.autoresizingMask = [.flexibleTopMargin, .flexibleRightMargin]
-        self.iconImageView = iconImageView
-        addSubview(iconImageView)
+    fileprivate func createleftIconImageView() {
+        let leftIconImageView = UIImageView()
+        leftIconImageView.backgroundColor = .clear
+        leftIconImageView.contentMode = .scaleAspectFit
+        leftIconImageView.autoresizingMask = [.flexibleTopMargin, .flexibleRightMargin]
+        self.leftIconImageView = leftIconImageView
+        addSubview(leftIconImageView)
     }
-
-    // MARK: Set icon hidden property
-
-    /// Shows the corresponding icon depending on iconType property
-    fileprivate func updateIconViewHiddenState() {
-        switch iconType {
-        case .font:
-            self.iconLabel.isHidden = false
-            self.iconImageView.isHidden = true
-        case .image:
-            self.iconLabel.isHidden = true
-            self.iconImageView.isHidden = false
+    
+    fileprivate func createRightIconImageView() {
+        let rightIconImageView = UIImageView()
+        rightIconImageView.backgroundColor = .clear
+        rightIconImageView.contentMode = .scaleAspectFit
+        rightIconImageView.autoresizingMask = [.flexibleTopMargin, .flexibleRightMargin]
+        self.rightIconImageView = rightIconImageView
+        addSubview(rightIconImageView)
+    }
+    
+    fileprivate func createLeftButtonView() {
+        let leftButtonView = UIButton()
+        leftButtonView.backgroundColor = .clear
+        leftButtonView.contentMode = .scaleAspectFit
+        leftButtonView.imageView?.contentMode = .scaleAspectFit
+        leftButtonView.addTarget(self, action: #selector(leftButtonAction), for: .touchUpInside)
+        leftButtonView.autoresizingMask = [.flexibleTopMargin, .flexibleRightMargin]
+        self.leftIconButtonView = leftButtonView
+        addSubview(leftButtonView)
+    }
+    
+    @objc func rightButtonAction() {
+        if let rightButtonHandler = self.rightButtonActionHandler {
+            rightButtonHandler()
         }
     }
-
+    
+    @objc func leftButtonAction() {
+        if let leftButtonHandler = self.leftButtonActionHandler {
+            leftButtonHandler()
+        }
+    }
+    
+    fileprivate func createRightButtonView() {
+        let rightButtonView = UIButton()
+        rightButtonView.backgroundColor = .clear
+        rightButtonView.contentMode = .scaleAspectFit
+        rightButtonView.imageView?.contentMode = .scaleAspectFit
+        rightButtonView.addTarget(self, action: #selector(rightButtonAction), for: .touchUpInside)
+        rightButtonView.autoresizingMask = [.flexibleTopMargin, .flexibleRightMargin]
+        self.rightIconButtonView = rightButtonView
+        addSubview(rightButtonView)
+    }
+    
+    // MARK: Set icon hidden property
+    
+    /// Shows the corresponding icon depending on iconType property
+    fileprivate func updateLeftIconViewHiddenState() {
+        switch leftIconType {
+        case .font:
+            self.iconLabel.isHidden = false
+            self.leftIconImageView.isHidden = true
+            self.leftIconButtonView.isHidden = true
+        case .image:
+            self.iconLabel.isHidden = true
+            self.leftIconImageView.isHidden = false
+            self.leftIconButtonView.isHidden = true
+        case .button:
+            self.iconLabel.isHidden = true
+            self.leftIconImageView.isHidden = true
+            self.leftIconButtonView.isHidden = false
+        }
+    }
+    
+    fileprivate func updateRightIconViewHiddenState() {
+        switch rightIconType {
+        case .font:
+            self.iconLabel.isHidden = false
+            self.rightIconImageView.isHidden = true
+            self.rightIconButtonView.isHidden = true
+        case .image:
+            self.iconLabel.isHidden = true
+            self.rightIconImageView.isHidden = false
+            self.rightIconButtonView.isHidden = true
+        case .button:
+            self.iconLabel.isHidden = true
+            self.rightIconImageView.isHidden = true
+            self.rightIconButtonView.isHidden = false
+        }
+    }
+    
     // MARK: Handling the icon color
-
+    
     /// Update the colors for the control. Override to customize colors.
     override open func updateColors() {
         super.updateColors()
         updateIconLabelColor()
     }
-
+    
     fileprivate func updateIconLabelColor() {
         if !isEnabled {
             iconLabel?.textColor = disabledColor
@@ -230,15 +335,15 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
             iconLabel?.textColor = editingOrSelected ? selectedIconColor : iconColor
         }
     }
-
+    
     // MARK: Custom layout overrides
-
+    
     /**
      Calculate the bounds for the textfield component of the control.
      Override to create a custom size textbox in the control.
      - parameter bounds: The current bounds of the textfield component
      - returns: The rectangle that the textfield component should render in
-    */
+     */
     override open func textRect(forBounds bounds: CGRect) -> CGRect {
         var rect = super.textRect(forBounds: bounds)
         if isLTRLanguage {
@@ -249,7 +354,7 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
         rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
         return rect
     }
-
+    
     /**
      Calculate the rectangle for the textfield when it is being edited
      - parameter bounds: The current bounds of the field
@@ -265,9 +370,9 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
         rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
         return rect
     }
-
+    
     /**
-     Calculates the bounds for the placeholder component of the control. 
+     Calculates the bounds for the placeholder component of the control.
      Override to create a custom size textbox in the control.
      - parameter bounds: The current bounds of the placeholder component
      - returns: The rectangle that the placeholder component should render in
@@ -282,13 +387,13 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
         rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
         return rect
     }
-
+    
     /// Invoked by layoutIfNeeded automatically
     override open func layoutSubviews() {
         super.layoutSubviews()
         updateFrame()
     }
-
+    
     fileprivate func updateFrame() {
         let textWidth: CGFloat = bounds.size.width
         if isLTRLanguage {
@@ -298,8 +403,26 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
                 width: iconWidth,
                 height: textHeight()
             )
-            iconImageView.frame = CGRect(
+            leftIconImageView.frame = CGRect(
                 x: 0,
+                y: bounds.size.height - textHeight() - iconMarginBottom,
+                width: iconWidth,
+                height: textHeight()
+            )
+            leftIconButtonView.frame = CGRect(
+                x: 0,
+                y: bounds.size.height - textHeight() - iconMarginBottom,
+                width: iconWidth,
+                height: textHeight()
+            )
+            rightIconImageView.frame = CGRect(
+                x: textWidth - iconWidth,
+                y: bounds.size.height - textHeight() - iconMarginBottom,
+                width: iconWidth,
+                height: textHeight()
+            )
+            rightIconButtonView.frame = CGRect(
+                x: textWidth - iconWidth,
                 y: bounds.size.height - textHeight() - iconMarginBottom,
                 width: iconWidth,
                 height: textHeight()
@@ -311,12 +434,31 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
                 width: iconWidth,
                 height: textHeight()
             )
-            iconImageView.frame = CGRect(
+            leftIconImageView.frame = CGRect(
                 x: textWidth - iconWidth,
+                y: bounds.size.height - textHeight() - iconMarginBottom,
+                width: iconWidth,
+                height: textHeight()
+            )
+            leftIconButtonView.frame = CGRect(
+                x: textWidth - iconWidth,
+                y: bounds.size.height - textHeight() - iconMarginBottom,
+                width: iconWidth,
+                height: textHeight()
+            )
+            rightIconImageView.frame = CGRect(
+                x: 0,
+                y: bounds.size.height - textHeight() - iconMarginBottom,
+                width: iconWidth,
+                height: textHeight()
+            )
+            rightIconButtonView.frame = CGRect(
+                x: 0,
                 y: bounds.size.height - textHeight() - iconMarginBottom,
                 width: iconWidth,
                 height: textHeight()
             )
         }
     }
+    
 }
