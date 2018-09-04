@@ -287,7 +287,7 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
     fileprivate func updateLeftIconViewHiddenState() {
         switch leftIconType {
         case .font:
-            self.iconLabel.isHidden = false
+            self.iconLabel.isHidden = true
             self.leftIconImageView.isHidden = true
             self.leftIconButtonView.isHidden = true
         case .image:
@@ -304,7 +304,7 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
     fileprivate func updateRightIconViewHiddenState() {
         switch rightIconType {
         case .font:
-            self.iconLabel.isHidden = false
+            self.iconLabel.isHidden = true
             self.rightIconImageView.isHidden = true
             self.rightIconButtonView.isHidden = true
         case .image:
@@ -362,12 +362,35 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
      */
     override open func editingRect(forBounds bounds: CGRect) -> CGRect {
         var rect = super.editingRect(forBounds: bounds)
+        
         if isLTRLanguage {
-            rect.origin.x += CGFloat(iconWidth + iconMarginLeft)
+            if leftIconType == .font {
+                rect.origin.x = 0
+                if rightIconType != .font {
+                    rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
+                }
+            }
+            if leftIconType != .font {
+                rect.origin.x += CGFloat(iconWidth + iconMarginLeft)
+                if rightIconType != .font {
+                    rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
+                }
+            }
+            
         } else {
+            if leftIconType == .font {
+                if rightIconType != .font {
+                    rect.origin.x = CGFloat(iconWidth + iconMarginLeft)
+                }
+            }
+            if leftIconType != .font {
+                rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
+                if rightIconType != .font {
+                    rect.origin.x += CGFloat(iconWidth + iconMarginLeft)
+                }
+            }
             // don't change the editing field X position for RTL languages
         }
-        rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
         return rect
     }
     
@@ -379,12 +402,41 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
      */
     override open func placeholderRect(forBounds bounds: CGRect) -> CGRect {
         var rect = super.placeholderRect(forBounds: bounds)
+        
+        //        if isLTRLanguage {
+        //            rect.origin.x += CGFloat(iconWidth + iconMarginLeft)
+        //        } else {
+        //            // don't change the editing field X position for RTL languages
+        //        }
+        //        rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
         if isLTRLanguage {
-            rect.origin.x += CGFloat(iconWidth + iconMarginLeft)
+            if leftIconType == .font {
+                rect.origin.x = 0
+                if rightIconType != .font {
+                    rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
+                }
+            }
+            if leftIconType != .font {
+                rect.origin.x += CGFloat(iconWidth + iconMarginLeft)
+                if rightIconType != .font {
+                    rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
+                }
+            }
+            
         } else {
+            if leftIconType == .font {
+                if rightIconType != .font {
+                    rect.origin.x = CGFloat(iconWidth + iconMarginLeft)
+                }
+            }
+            if leftIconType != .font {
+                rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
+                if rightIconType != .font {
+                    rect.origin.x += CGFloat(iconWidth + iconMarginLeft)
+                }
+            }
             // don't change the editing field X position for RTL languages
         }
-        rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
         return rect
     }
     
