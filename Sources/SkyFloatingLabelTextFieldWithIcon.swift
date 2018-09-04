@@ -347,11 +347,32 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
     override open func textRect(forBounds bounds: CGRect) -> CGRect {
         var rect = super.textRect(forBounds: bounds)
         if isLTRLanguage {
-            rect.origin.x += CGFloat(iconWidth + iconMarginLeft)
+            if leftIconType == .font {
+                rect.origin.x = 0
+                if rightIconType != .font {
+                    rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
+                }
+            }
+            if leftIconType != .font {
+                rect.origin.x += CGFloat(iconWidth + iconMarginLeft)
+                if rightIconType != .font {
+                    rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
+                }
+            }
+            
         } else {
-            rect.origin.x -= CGFloat(iconWidth + iconMarginLeft)
+            if leftIconType == .font {
+                if rightIconType != .font {
+                    rect.origin.x = CGFloat(iconWidth + iconMarginLeft)
+                }
+            }
+            if leftIconType != .font {
+                rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
+                if rightIconType != .font {
+                    rect.origin.x += CGFloat(iconWidth + iconMarginLeft)
+                }
+            }
         }
-        rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
         return rect
     }
     
@@ -389,7 +410,6 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
                     rect.origin.x += CGFloat(iconWidth + iconMarginLeft)
                 }
             }
-            // don't change the editing field X position for RTL languages
         }
         return rect
     }
