@@ -364,6 +364,7 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
             if leftIconType == .font {
                 if rightIconType != .font {
                     rect.origin.x = CGFloat(iconWidth + iconMarginLeft)
+                    rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
                 }
             }
             if leftIconType != .font {
@@ -402,6 +403,7 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
             if leftIconType == .font {
                 if rightIconType != .font {
                     rect.origin.x = CGFloat(iconWidth + iconMarginLeft)
+                    rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
                 }
             }
             if leftIconType != .font {
@@ -447,6 +449,7 @@ open class SkyFloatingLabelTextFieldWithIcon: SkyFloatingLabelTextField {
             if leftIconType == .font {
                 if rightIconType != .font {
                     rect.origin.x = CGFloat(iconWidth + iconMarginLeft)
+                    rect.size.width -= CGFloat(iconWidth + iconMarginLeft)
                 }
             }
             if leftIconType != .font {
